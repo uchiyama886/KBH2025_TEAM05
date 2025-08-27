@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { usePost } from '../../hooks/usePost'; // usePostフックをインポート
 
 const PostScreen = () => {
   const [description, setDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
+
+  // usePostフックを呼び出してcreatePost関数とloadingステートを取得
+  const { createPost, loading } = usePost();
 
   const generateCommitMessage = () => {
     if (!description || !selectedCategory) {
@@ -15,17 +19,24 @@ const PostScreen = () => {
   };
   const commitMessage = generateCommitMessage();
 
-  const handlePost = () => {
-    const postData = {
-      description: description,
-      category: selectedCategory,
-      emoji: selectedEmoji,
-      commitMessage: commitMessage,
-      timestamp: new Date().toISOString(),
-    };
-    console.log('投稿データ:', postData);
-    // 実際にデータを記録するAPIを呼び出す
-    // 例: create_note(title=commitMessage, text_content=description)
+  const handlePost = async () => {
+    if (!description || !selectedCategory || !selectedEmoji) {
+      Alert.alert('エラー', '内容、カテゴリー、スタンプをすべて選択してください。');
+      return;
+    }
+
+    // createPost関数を呼び出し、必要なデータを渡す
+    const newPost = await createPost(description, [selectedCategory], selectedEmoji);
+
+    if (newPost) {
+      Alert.alert('成功', '投稿が完了しました！');
+      // 投稿後、フォームをリセット
+      setDescription('');
+      setSelectedCategory(null);
+      setSelectedEmoji(null);
+    } else {
+      Alert.alert('エラー', '投稿に失敗しました。もう一度お試しください。');
+    }
   };
 
   return (
@@ -105,7 +116,7 @@ const PostScreen = () => {
         <View style={styles.stampCard}>
           <Text style={styles.label}>スタンプを選択 🤸</Text>
           <View style={styles.stampContainer}>
-            {['📚', '🧹', '🍳', '🏃', '📖', '🎮', '🎨', '🎵', '🌱', '🎯'].map((emoji, index) => (
+            {['📚', '🧹', '🍳', '🏃', '📖', '🎮', '🎨', '🎵', '🌱', '💯'].map((emoji, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
@@ -122,10 +133,13 @@ const PostScreen = () => {
       </ScrollView>
 
       <TouchableOpacity
-        style={styles.postButton}
+        style={[styles.postButton, loading && styles.disabledButton]}
         onPress={handlePost}
+        disabled={loading}
       >
-        <Text style={styles.postButtonText}>コミットを投稿</Text>
+        <Text style={styles.postButtonText}>
+          {loading ? '投稿中...' : 'コミットを投稿'}
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -161,6 +175,7 @@ const styles = StyleSheet.create({
   emojiText: { fontSize: 24 },
   postButton: { backgroundColor: 'pink', padding: 16, borderRadius: 25, marginHorizontal: 16, marginBottom: 20, alignItems: 'center' },
   postButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  disabledButton: { backgroundColor: '#ccc' },
 });
 
 export default PostScreen;
