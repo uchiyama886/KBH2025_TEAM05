@@ -18,11 +18,25 @@
     "react-dom": "19.0.0",
     "react-native": "^0.79.5",
     "react-native-web": "^0.20.0"
+    "expo-linear-gradient": "~14.1.5",
+    "expo-status-bar": "~2.2.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-vector-icons": "^10.3.0",
+    "react-native-web": "^0.20.0",
+    "react-native-web-linear-gradient": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@react-navigation/bottom-tabs": "^7.4.6",
     "@react-navigation/native": "^7.1.17",
+    "expo-web-browser": "^14.2.0",
+    "react-native-linear-gradient": "^2.8.3",
+    "react-native-svg": "^15.12.1",
+    "victory": "^37.3.6",
+    "victory-native": "^41.19.3"
     "@supabase/supabase-js": "^2.56.0",
     "expo-constants": "^17.1.7",
     "expo-linear-gradient": "^14.1.5",
