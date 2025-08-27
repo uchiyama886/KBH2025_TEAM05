@@ -2,7 +2,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // 画面コンポーネントをインポート
-import TimelineScreen from '../screens/Main/PostPage';
+import TimelinePage from '../screens/Main/TimelinePage';
 import PostPage from '../screens/Main/PostPage';
 import DashboardPage from '../screens/Main/DashboardPage';
 
@@ -20,7 +20,8 @@ export default function AppNavigator() {
         tabBarStyle: { paddingBottom: 5, height: 60 },
       }}
     >
-      <Tab.Screen name="タイムライン" component={TimelineScreen} />
+
+      <Tab.Screen name="タイムライン" component={TimelinePage} />
       <Tab.Screen name="投稿" component={PostPage} />
       <Tab.Screen name="ダッシュボード" component={DashboardPage} />
     </Tab.Navigator>
