@@ -12,9 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "extra":{
-      "supabaseUrl":"${SUPABASE_URL}",
-      "supabaseAnonKey":"${SUPABASE_ANON_KEY}"
+    "extra": {
+      "supabaseUrl": "${SUPABASE_URL}",
+      "supabaseAnonKey": "${SUPABASE_ANON_KEY}"
     },
     "ios": {
       "supportsTablet": true
@@ -28,6 +28,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

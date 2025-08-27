@@ -1,4 +1,5 @@
-// 投稿データを取得するフック
+// useFetchPosts.js
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 
@@ -10,10 +11,10 @@ export const useFetchPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // 'posts' テーブルから全ての投稿データを取得し、投稿日時の降順で並び替える
+        // postsテーブルと、postsテーブルのuser_idに関連付けられたusersテーブルのデータを取得
         const { data, error } = await supabase
           .from('posts')
-          .select('*')
+          .select('*, public.users(name, avatar_url)') // 修正点
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -29,7 +30,9 @@ export const useFetchPosts = () => {
     };
 
     fetchPosts();
-  }, []); // コンポーネントがマウントされた時に一度だけ実行
+
+    // ... (リアルタイムリスナーのコードはそのまま) ...
+  }, []);
 
   return { posts, loading, error };
 };
