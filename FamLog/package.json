@@ -31,6 +31,9 @@
     "react-native-svg": "^15.12.1",
     "victory": "^37.3.6",
     "victory-native": "^41.19.3"
+    "@supabase/supabase-js": "^2.56.0",
+    "expo-constants": "^17.1.7",
+    "expo-web-browser": "^14.2.0"
   },
   "private": true
 }

@@ -20,6 +20,7 @@ export default function AppNavigator() {
         tabBarStyle: { paddingBottom: 5, height: 60 },
       }}
     >
+
       <Tab.Screen name="タイムライン" component={TimelinePage} />
       <Tab.Screen name="投稿" component={PostPage} />
       <Tab.Screen name="ダッシュボード" component={DashboardPage} />
