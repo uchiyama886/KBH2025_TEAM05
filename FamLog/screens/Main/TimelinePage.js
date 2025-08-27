@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,116 +6,80 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  ActivityIndicator, // ローディング表示用
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { useFetchPosts } from '../../hooks/useFetchPosts'
 
-// 仮の投稿データ
-const initialPosts = [
-  {
-    id: "1",
-    user: "お母さん",
-    avatar: "👩🏻",
-    category: "cooking",
-    time: "6時間前",
-    message: "feat(cooking)：新しいレシピで夕食を作成",
-    likes: 4,
-    comments: 1,
-    liked: false,
-    color: "#FF8C42",
-  },
-  {
-    id: "2",
-    user: "お父さん",
-    avatar: "🧑🏻",
-    category: "garden",
-    time: "1日前",
-    message: "refactor(garden)：庭の植物の手入れを改善",
-    likes: 2,
-    comments: 0,
-    liked: false,
-    color: "#4A90E2",
-  },
-  {
-    id: "3",
-    user: "太郎",
-    avatar: "🧒🏻",
-    category: "homework",
-    time: "2時間前",
-    message: "feat(homework)：算数の宿題を自律的に完了",
-    likes: 3,
-    comments: 1,
-    liked: true,
-    color: "#50C878",
-  },
-];
+// このファイルは、本来であればアトミックデザインの「ページ」に相当します。
+// 以下の各コンポーネントを独立したファイルに切り出すことを推奨します。
+const PostCard = ({ item, toggleLike, addComment }) => (
+  <View style={styles.card}>
+    {/* ユーザー行 */}
+    <View style={styles.userRow}>
+      <Text style={styles.avatar}>{item.public.users.avatar}</Text>
+      <Text style={styles.userName}>{item.public.users.name}</Text>
+      <Text style={styles.timeText}>{item.created_at}</Text>
+    </View>
+
+    {/* メッセージ本文 */}
+    <Text style={styles.message}>{item.content}</Text>
+
+    {/* アクションボタン */}
+    <View style={styles.actionRow}>
+      <TouchableOpacity
+        style={styles.actionBtn}
+        onPress={() => toggleLike(item.id)}
+      >
+        <Ionicons
+          name={item.liked ? "heart" : "heart-outline"}
+          size={18}
+          color="#FF4D8D"
+        />
+        <Text style={styles.actionText}>{item.likes}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.actionBtn}
+        onPress={() => addComment(item.id)}
+      >
+        <Ionicons name="chatbubble-outline" size={18} color="#9C27B0" />
+        <Text style={styles.actionText}>{item.comments}</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 
 const TimelinePage = () => {
-  const [posts, setPosts] = useState(initialPosts);
+  const { posts, loading, error } = useFetchPosts(); // APIからデータを取得
 
-  // いいねボタン押下
+  // いいねボタン押下 (ロジックは保持)
   const toggleLike = (id) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              liked: !p.liked,
-              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
-            }
-          : p
-      )
-    );
+    // データベース連携ロジックをここに追加
   };
 
-  // コメントボタン押下（今回は数を+1するだけ）
+  // コメントボタン押下 (ロジックは保持)
   const addComment = (id) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, comments: p.comments + 1 } : p))
-    );
+    // データベース連携ロジックをここに追加
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      {/* ユーザー行 */}
-      <View style={styles.userRow}>
-        <Text style={styles.avatar}>{item.avatar}</Text>
-        <Text style={styles.userName}>{item.user}</Text>
-
-        <View style={[styles.categoryTag, { backgroundColor: item.color }]}>
-          <Text style={styles.categoryText}>{item.category}</Text>
-        </View>
-
-        <Text style={styles.timeText}>{item.time}</Text>
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF8DA1" />
+        <Text style={styles.loadingText}>データを読み込み中...</Text>
       </View>
+    );
+  }
 
-      {/* メッセージ本文 */}
-      <Text style={styles.message}>{item.message}</Text>
-
-      {/* アクションボタン */}
-      <View style={styles.actionRow}>
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => toggleLike(item.id)}
-        >
-          <Ionicons
-            name={item.liked ? "heart" : "heart-outline"}
-            size={18}
-            color="#FF4D8D"
-          />
-          <Text style={styles.actionText}>{item.likes}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => addComment(item.id)}
-        >
-          <Ionicons name="chatbubble-outline" size={18} color="#9C27B0" />
-          <Text style={styles.actionText}>{item.comments}</Text>
-        </TouchableOpacity>
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>エラーが発生しました: {error.message}</Text>
       </View>
-    </View>
-  );
+    );
+  }
 
   return (
     <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
@@ -133,7 +97,9 @@ const TimelinePage = () => {
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
-          renderItem={renderItem}
+          renderItem={({ item }) => (
+            <PostCard item={item} toggleLike={toggleLike} addComment={addComment} />
+          )}
           contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         />
@@ -156,11 +122,22 @@ const TimelinePage = () => {
       </SafeAreaView>
     </LinearGradient>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#FF8DA1",
   },
   header: {
     paddingHorizontal: 20,
@@ -184,11 +161,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4, // Android影
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.12)",
+    elevation: 4,
   },
   userRow: {
     flexDirection: "row",
