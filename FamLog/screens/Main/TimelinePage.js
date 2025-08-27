@@ -50,7 +50,7 @@ const initialPosts = [
   },
 ];
 
-export default function App() {
+const TimelinePage = () => {
   const [posts, setPosts] = useState(initialPosts);
 
   // いいねボタン押下
@@ -259,3 +259,5 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+
+export default TimelinePage;
