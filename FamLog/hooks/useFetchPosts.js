@@ -1,7 +1,7 @@
 // useFetchPosts.js
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../utils/supabase';
 
 export const useFetchPosts = () => {
   const [posts, setPosts] = useState([]);

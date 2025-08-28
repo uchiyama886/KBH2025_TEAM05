@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { usePost } from '../../hooks/usePost';
+import CategorySelector from '../../components/molecules/CategorySelector';
 import PostHeader from '../../components/molecules/PostHeader';
 import UserInfo from '../../components/molecules/UserInfo';
 import PostInput from '../../components/molecules/PostInput';
-import CategorySelector from '../../components/molecules/CategorySelector';
 import CommitMessageDisplay from '../../components/molecules/CommitMessageDisplay';
 import StampSelector from '../../components/molecules/StampSelector';
 import PostButton from '../../components/molecules/PostButton';
 
-const PostScreen = () => {
+const PostPage = () => {
   const [description, setDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
@@ -76,4 +76,4 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
 });
 
-export default PostScreen;
+export default PostPage;

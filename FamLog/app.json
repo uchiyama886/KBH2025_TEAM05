@@ -29,8 +29,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "famlog",
     "plugins": [
-      "expo-secure-store"
+      "@react-native-google-signin/google-signin"
     ]
   }
 }
