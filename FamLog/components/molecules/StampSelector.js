@@ -1,67 +1,81 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 
-const emojis = ['📚', '🧹', '🍳', '🏃', '📖', '🎮', '🎨', '🎵', '🌱', '🎯'];
+const emojis = ['👍', '✨', '🎉', '🚀', '💡', '🤔', '🙌', '💯', '🔥', '👀', '✅', '🌈'];
 
-const StampSelector = ({ selectedEmoji, onSelectEmoji }) => {
+// 変更: selectedEmojisは配列を受け取り、onSelectEmojiも配列を返すように変更
+const StampSelector = ({ selectedEmojis, onSelectEmoji }) => {
+  const handleSelectEmoji = (emoji) => {
+    // 既に選択されているかチェック
+    const isSelected = selectedEmojis.includes(emoji);
+
+    if (isSelected) {
+      // 既に選択されている場合は、その絵文字を配列から削除
+      onSelectEmoji(selectedEmojis.filter(e => e !== emoji));
+    } else {
+      // 選択されていない場合は、配列に追加
+      onSelectEmoji([...selectedEmojis, emoji]);
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    const isSelected = selectedEmojis.includes(item);
+    return (
+      <TouchableOpacity
+        style={[styles.emojiButton, isSelected && styles.selectedEmojiButton]}
+        onPress={() => handleSelectEmoji(item)}
+      >
+        <Text style={styles.emojiText}>{item}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={styles.stampCard}>
-      <Text style={styles.label}>スタンプを選択 🤸</Text>
-      <View style={styles.stampContainer}>
-        {emojis.map((emoji, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.stampButton,
-              selectedEmoji === emoji && styles.selectedStampButton,
-            ]}
-            onPress={() => onSelectEmoji(emoji)}
-          >
-            <Text style={styles.emojiText}>{emoji}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.label}>スタンプ</Text>
+      <FlatList
+        data={emojis}
+        renderItem={renderItem}
+        keyExtractor={(item) => item}
+        numColumns={6} // 1行に表示する絵文字の数
+        columnWrapperStyle={styles.row}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  stampCard: {
+  container: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  stampContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  row: {
     justifyContent: 'flex-start',
-    gap: 10,
+    flexWrap: 'wrap', // 折り返しを有効にする
+    marginBottom: 8,
   },
-  stampButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 8,
-    alignItems: 'center',
+  emojiButton: {
+    padding: 8,
+    margin: 4,
+    borderRadius: 20,
+    backgroundColor: '#eee',
     justifyContent: 'center',
+    alignItems: 'center',
+    width: 40, // ボタンの幅を固定
+    height: 40, // ボタンの高さを固定
   },
-  selectedStampButton: {
-    borderWidth: 2,
-    borderColor: '#ff99b3',
+  selectedEmojiButton: {
+    backgroundColor: '#FF69B4', // 選択時の背景色
   },
   emojiText: {
-    fontSize: 24,
+    fontSize: 20,
   },
 });
 

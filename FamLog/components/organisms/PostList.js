@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'; // 変更: useStateを削除
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { usePost } from '../../hooks/usePost'; // usePostを削除し、必要な場合のみインポート
+// usePostのインポートを削除
 
 import UserInfo from '../molecules/UserInfo';
 import CategorySelector from '../molecules/CategorySelector';
@@ -11,21 +11,19 @@ import PostButton from '../molecules/PostButton';
 import PostInput from '../molecules/PostInput';
 import CustomAlert from '../molecules/CustomAlert';
 
-// 変更: propsとして状態と関数を受け取る
+// 変更: propsとしてselectedEmojisとsetSelectedEmojisを受け取る
 const Postlist = ({ 
   description,
   setDescription,
   selectedCategory,
   setSelectedCategory,
-  selectedEmoji,
-  setSelectedEmoji,
+  selectedEmojis, // 変更
+  setSelectedEmojis, // 変更
   handlePost,
   loading,
 }) => {
-  // useStateフックをすべて削除
   const navi = useNavigation();
 
-  // コミットメッセージを生成する関数
   const generateCommitMessage = (desc, category) => {
     if (desc.trim() === '' || !category) {
       return '';
@@ -42,24 +40,20 @@ const Postlist = ({
         <UserInfo />
       </View>
       <ScrollView style={styles.content}>
-        {/* 投稿内容 */}
         <PostInput 
           description={description}
           setDescription={setDescription}
         />
-        {/* カテゴリー */}
         <CategorySelector
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
-        {/* スタンプ */}
+        {/* 変更: selectedEmojisとonSelectEmojiを渡す */}
         <StampSelector
-          selectedEmoji={selectedEmoji}
-          onSelectEmoji={setSelectedEmoji}
+          selectedEmojis={selectedEmojis} 
+          onSelectEmoji={setSelectedEmojis} 
         />
-        {/* コミットメッセージ */}
         <CommitMessageDisplay commitMessage={commitMessage} />
-        {/* 投稿ボタン */}
         <PostButton onPress={handlePost} loading={loading} />
       </ScrollView>
     </SafeAreaView>
