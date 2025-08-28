@@ -1,238 +1,230 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient'; 
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from 'victory';
-import Icon from 'react-native-vector-icons/Feather';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { BarChart } from "react-native-chart-kit";
+
+// useFetchPostsをインポート
+import { useFetchPosts } from "../../hooks/useFetchPosts";
+
+// 画面の幅を取得
+const screenWidth = Dimensions.get("window").width;
+
+/**
+ * 投稿データから貢献度グラフ用のデータを生成
+ * @param {Array} posts - 取得した投稿データ
+ * @returns {{labels: Array, datasets: Array}}
+ */
+const getChartData = (posts) => {
+  const contributionMap = {};
+  const today = new Date();
+  const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
+  const labels = [];
+
+  // 過去7日間の日付をキーとして初期化
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const day = daysOfWeek[date.getDay()];
+    contributionMap[day] = 0;
+    labels.push(day);
+  }
+
+  // データを日付ごとに集計
+  posts.forEach((post) => {
+    const date = new Date(post.created_at);
+    const day = daysOfWeek[date.getDay()];
+    if (contributionMap.hasOwnProperty(day)) {
+      contributionMap[day]++;
+    }
+  });
+
+  const data = labels.map(day => contributionMap[day]);
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        data: data,
+      },
+    ],
+  };
+};
+
+/**
+ * 貢献度が最も高いユーザーを計算（今週のMVP）
+ * @param {Array} posts - 取得した投稿データ
+ * @returns {{name: string, commits: number}|null} MVPのユーザー情報、またはnull
+ */
+const calculateMVP = (posts) => {
+  const commitCounts = {};
+  posts.forEach((post) => {
+    const userId = post.user_id;
+    if (commitCounts[userId]) {
+      commitCounts[userId].commits++;
+    } else {
+      // ユーザー情報がネストされていると仮定
+      commitCounts[userId] = {
+        name: post.users.name,
+        commits: 1,
+      };
+    }
+  });
+
+  let maxCommits = 0;
+  let mvp = null;
+
+  for (const userId in commitCounts) {
+    if (commitCounts[userId].commits > maxCommits) {
+      maxCommits = commitCounts[userId].commits;
+      mvp = commitCounts[userId];
+    }
+  }
+
+  return mvp;
+};
 
 const DashboardPage = () => {
-  const weeklyActivityData = [
-    { day: '月', commits: 3 },
-    { day: '火', commits: 5 },
-    { day: '水', commits: 2 },
-    { day: '木', commits: 8 },
-    { day: '金', commits: 4 },
-    { day: '土', commits: 6 },
-    { day: '日', commits: 7 },
-  ];
+  // useFetchPostsフックを使用してデータを取得
+  const { posts, loading, error } = useFetchPosts();
+  const chartData = getChartData(posts);
+  const mvp = calculateMVP(posts);
 
-  const rankingData = [
-    { rank: 1, name: '太郎', relation: '子', commits: 2, avgLikes: 2.0, icon: '👦' },
-    { rank: 2, name: 'お父さん', relation: '親', commits: 1, avgLikes: 2.0, icon: '👨' },
-    { rank: 3, name: 'お母さん', relation: '親', commits: 1, avgLikes: 4.0, icon: '👩' },
-    { rank: 4, name: '花子', relation: '子', commits: 1, avgLikes: 2.0, icon: '👧' },
-  ];
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF8DA1" />
+        <Text style={styles.loadingText}>データを読み込み中...</Text>
+      </View>
+    );
+  }
 
-  const screenWidth = Dimensions.get('window').width;
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>エラーが発生しました: {error.message}</Text>
+      </View>
+    );
+  }
 
   return (
-    <LinearGradient colors={['#fff5f7', '#f0f7ff']} style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ヘッダー */}
-        <View style={styles.header}>
-          <Icon name="menu" size={26} color="#ff66b2" />
-          <Text style={styles.headerTitle}>ダッシュボード</Text>
-          <Icon name="bell" size={26} color="#ff66b2" />
-        </View>
-
-<View style={styles.cardRow}>
-  {/* 今月のコミット - 緑グラデーション */}
-  <LinearGradient
-    colors={['#b2f7ef', '#5dd39e']}
-    style={[styles.card, styles.topCard]}
-  >
-    <View style={styles.cardContent}>
-      <Text style={styles.cardTitle}>今月のコミット</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* アイコンをFeatherから変更 */}
-        <Icon name="bar-chart-2" size={36} color="#2e8b57" />
-        <Text style={[styles.cardValue, { color: '#2e8b57', marginLeft: 8 }]}>
-          12
-        </Text>
-      </View>
-    </View>
-  </LinearGradient>
-
-  {/* 自律性指数 - 紫グラデーション */}
-  <LinearGradient
-    colors={['#d6c6ff', '#a066ff']}
-    style={[styles.card, styles.topCard]}
-  >
-    <View style={styles.cardContent}>
-      <Text style={styles.cardTitle}>自律性指数</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* アイコンをFeatherから変更 */}
-        <Icon name="award" size={36} color="#6a0dad" />
-        <Text style={[styles.cardValue, { color: '#6a0dad', marginLeft: 8 }]}>
-          60%
-        </Text>
-      </View>
-    </View>
-  </LinearGradient>
-</View>
-
-
-        {/* 今週のMVP */}
-        <LinearGradient colors={['#fff7d6', '#fff0b3']} style={[styles.card, styles.mvpCard]}>
-          <Text style={styles.mvpTitle}>今週のMVP</Text>
-          <View style={styles.mvpContent}>
-            <Text style={styles.mvpIcon}>👦</Text>
-            <View style={styles.mvpInfo}>
-              <Text style={styles.mvpName}>太郎</Text>
-              <Text style={styles.mvpCommits}>2回のコミット</Text>
-              <Text style={styles.mvpMessage}>🌟 素晴らしい週でした！</Text>
-            </View>
-            <Text style={styles.trophyIcon}>🏆</Text>
-          </View>
-        </LinearGradient>
-
-        {/* 週間アクティビティ */}
-        <View style={[styles.card, { minHeight: 300 }]}>
-          <Text style={styles.sectionTitle}>週間アクティビティ</Text>
-          <VictoryChart domainPadding={20} width={screenWidth - 40} height={240}>
-            <VictoryAxis
-              tickValues={weeklyActivityData.map(d => d.day)}
-              style={{
-                axis: { stroke: "transparent" },
-                ticks: { stroke: "transparent" },
-                tickLabels: { fontSize: 14, padding: 5, fill: "#555" }
-              }}
-            />
-            <VictoryBar
-              data={weeklyActivityData}
-              x="day"
-              y="commits"
-              barRatio={0.7}
-              labels={({ datum }) => datum.commits}
-              labelComponent={<VictoryLabel dy={-10} />}
-              style={{
-                data: {
-                  fill: ({ index }) =>
-                    ['#ff9aa2', '#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7', '#c7ceea', '#a5dee5'][index],
-                  fillOpacity: 0.95,
+    <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.sectionTitle}>今週の貢献度</Text>
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={chartData}
+              width={screenWidth - 40}
+              height={220}
+              yAxisLabel=""
+              chartConfig={{
+                backgroundGradientFrom: "#fff",
+                backgroundGradientTo: "#fff",
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(223, 75, 120, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(68, 68, 68, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: "",
                 },
               }}
+              style={styles.chart}
             />
-          </VictoryChart>
-        </View>
+          </View>
 
-        {/* ランキング */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>家族貢献度ランキング</Text>
-          {rankingData.map((item, index) => (
-            <View key={index} style={styles.rankingItem}>
-              <Text style={styles.rankingIcon}>{item.icon}</Text>
-              <Text style={styles.rankingNumber}>{item.rank}</Text>
-              <View style={styles.rankingInfo}>
-                <Text style={styles.rankingName}>
-                  {item.name} <Text style={styles.relation}>{item.relation}</Text>
-                </Text>
-                <Text style={styles.rankingDetails}>
-                  {item.commits}コミット 平均{item.avgLikes}いいね
-                </Text>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${(item.commits / 2) * 100}%` }]} />
-                </View>
+          <View style={styles.mvpContainer}>
+            <Text style={styles.sectionTitle}>今週のMVP</Text>
+            {mvp ? (
+              <View style={styles.mvpCard}>
+                <Ionicons name="trophy-outline" size={30} color="#FFD700" />
+                <Text style={styles.mvpText}>{mvp.name}</Text>
+                <Text style={styles.mvpCommitsText}>{mvp.commits}投稿</Text>
               </View>
-            </View>
-          ))}
-        </View>
-
-        {/* 子供の自律性成長 */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>子供の自律性成長</Text>
-
-          {/* プログレスバー */}
-          <Text style={{ fontSize: 14, marginBottom: 5, color: '#666' }}>今月の自律的行動: 70%</Text>
-          <View style={styles.progressBarLarge}>
-            <View style={[styles.progressFillLarge, { width: '70%' }]} />
-          </View>
-
-          {/* 行動の対比カード */}
-          <View style={styles.behaviorRow}>
-            <View style={[styles.behaviorBox, { backgroundColor: '#ffe0f0' }]}>
-              <Text style={styles.behaviorLabel}>自律的行動</Text>
-              <Text style={styles.behaviorValue}>15回</Text>
-            </View>
-            <View style={[styles.behaviorBox, { backgroundColor: '#e0f7ff' }]}>
-              <Text style={styles.behaviorLabel}>親の行動</Text>
-              <Text style={styles.behaviorValue}>5回</Text>
-            </View>
+            ) : (
+              <Text>今週の投稿はありません</Text>
+            )}
           </View>
         </View>
-
-        {/* AIレポート再生ボタン */}
-        <TouchableOpacity style={{ marginBottom: 30 }}>
-          <LinearGradient
-            colors={['#ff66b2', '#a066ff']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.reportButton}
-          >
-            <Text style={styles.reportButtonText}>AIレポートを再生 ▶︎</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 20 },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingTop: 20, paddingBottom: 20,
+  container: {
+    flex: 1,
   },
-  headerTitle: { fontSize: 26, fontWeight: 'bold', color: '#ff66b2' },
-  cardRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-  card: {
-    borderRadius: 20, padding: 20, marginBottom: 20,
-    backgroundColor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFE6F0",
   },
-  topCard: { flex: 1, alignItems: 'center', justifyContent: 'center', marginHorizontal: 5 },
-  cardContent: { alignItems: 'center' },
-  cardTitle: { fontSize: 14, color: '#666', marginBottom: 5 },
-  cardValue: { fontSize: 34, fontWeight: 'bold', color: '#333' },
-  mvpCard: { marginBottom: 20 },
-  mvpTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#444' },
-  mvpContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  mvpIcon: { fontSize: 40, marginRight: 15 },
-  mvpInfo: { flex: 1 },
-  mvpName: { fontSize: 18, fontWeight: 'bold', color: '#333' },
-  mvpCommits: { fontSize: 14, color: '#888', marginTop: 2 },
-  mvpMessage: { fontSize: 14, color: '#ff66b2', marginTop: 5 },
-  trophyIcon: { fontSize: 32 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#444' },
-  rankingItem: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', padding: 15,
-    borderRadius: 15, marginBottom: 12,
-    boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#444",
   },
-  rankingIcon: { fontSize: 28, marginRight: 8 },
-  rankingNumber: { fontSize: 18, fontWeight: 'bold', width: 30, textAlign: 'center', marginRight: 10, color: '#ff66b2' },
-  rankingInfo: { flex: 1 },
-  rankingName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  relation: { fontSize: 12, color: '#999', fontWeight: 'normal' },
-  rankingDetails: { fontSize: 12, color: '#777' },
-  progressBar: { height: 6, backgroundColor: '#eee', borderRadius: 3, marginTop: 5, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#ff9aa2', borderRadius: 3 },
-
-  progressBarLarge: { height: 12, backgroundColor: '#eee', borderRadius: 6, marginBottom: 15, overflow: 'hidden' },
-  progressFillLarge: { height: '100%', backgroundColor: '#ff66b2', borderRadius: 6 },
-
-  behaviorRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  behaviorBox: {
-    flex: 1, padding: 15, borderRadius: 12, alignItems: 'center',
-    marginHorizontal: 5, boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    marginBottom: 60,
   },
-  behaviorLabel: { fontSize: 14, color: '#555', marginBottom: 5 },
-  behaviorValue: { fontSize: 20, fontWeight: 'bold', color: '#333' },
-
-  reportButton: {
-    borderRadius: 30, paddingVertical: 15, alignItems: 'center',
-    justifyContent: 'center',
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#444",
+    marginBottom: 15,
   },
-  reportButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  chartContainer: {
+    borderRadius: 16,
+    padding: 10,
+    backgroundColor: "#fff",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    marginBottom: 20,
+  },
+  chart: {
+    borderRadius: 16,
+  },
+  mvpContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  mvpCard: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  mvpText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+    color: "#333",
+  },
+  mvpCommitsText: {
+    fontSize: 16,
+    marginLeft: 10,
+    color: "#888",
+  },
 });
 
 export default DashboardPage;
