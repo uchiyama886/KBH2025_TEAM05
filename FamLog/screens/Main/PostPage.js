@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { usePost } from '../../hooks/usePost';
-import CategorySelector from '../../components/molecules/CategorySelector';
-import UserInfo from '../../components/molecules/UserInfo';
-import CommitMessageDisplay from '../../components/molecules/CommitMessageDisplay';
-import StampSelector from '../../components/molecules/StampSelector';
 import Postlist from '../../components/organisms/PostList'
+import { useNavigation } from '@react-navigation/native';
 
 const PostPage = () => {
   const [description, setDescription] = useState('');
@@ -13,6 +10,7 @@ const PostPage = () => {
   const [selectedEmoji, setSelectedEmoji] = useState(null);
 
   const { createPost, loading } = usePost();
+  const navi = useNavigation();
 
   const generateCommitMessage = () => {
     if (!description || !selectedCategory) {
@@ -20,7 +18,6 @@ const PostPage = () => {
     }
     return `feat(${selectedCategory}): ${description.substring(0, 20)}...`;
   };
-  const commitMessage = generateCommitMessage();
 
   const handlePost = async () => {
     if (!description || !selectedCategory || !selectedEmoji) {
@@ -34,8 +31,7 @@ const PostPage = () => {
       Alert.alert('成功', '投稿が完了しました！');
       setDescription('');
       setSelectedCategory(null);
-      setSelectedEmoji(null);
-    } else {
+      setSelectedEmoji(null);      
       Alert.alert('エラー', '投稿に失敗しました。もう一度お試しください。');
     }
   };

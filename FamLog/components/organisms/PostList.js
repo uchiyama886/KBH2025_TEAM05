@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ActivityIndicator, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+
 
 // ---------------------------
 // 既存のファイルを統合
 // ---------------------------
 
 // PostHeader.js のコードを直接貼り付け
+
+
 const PostHeader = () => {
   return (
     <View style={headerStyles.header}>
@@ -242,7 +246,7 @@ const commitStyles = StyleSheet.create({
 });
 
 // StampSelector.js のコードを直接貼り付け
-const emojis = ['📚', '🧹', '🍳', '🏃', '📖', '🎮', '🎨', '🎵', '🌱', '🎯'];
+const emojis = ['📚', '🧹', '�', '🏃', '📖', '🎮', '🎨', '🎵', '🌱', '🎯'];
 const StampSelector = ({ selectedEmoji, onSelectEmoji }) => {
   return (
     <View style={stampStyles.stampCard}>
@@ -435,7 +439,7 @@ const alertStyles = StyleSheet.create({
 // ---------------------------
 // Postlist.js コンポーネント本体
 // ---------------------------
-const Postlist = () => {
+const Postlist = ({ navigation }) => {
   // useStateフックを定義して、入力状態と投稿の状態を管理
   const [postData, setPostData] = useState({
     description: '',
@@ -447,9 +451,15 @@ const Postlist = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
+  const navi = useNavigation();
+
   // ポップアップを閉じる関数
   const handleCloseAlert = () => {
     setAlertVisible(false);
+    // 投稿完了メッセージが表示されている場合、タイムラインに遷移
+    if (alertMessage === '投稿が完了しました！' && navigation) {
+      navi.navigate('TimelinePage');
+    }
   };
 
   // コミットメッセージを生成する関数
@@ -522,10 +532,10 @@ const Postlist = () => {
           selectedEmoji={postData.emoji}
           onSelectEmoji={(emoji) => handleUpdatePostData('emoji', emoji)}
         />
-        {/* 投稿ボタン */}
-        <PostButton onPress={handlePost} loading={loading} />
         {/* コミットメッセージ */}
         <CommitMessageDisplay commitMessage={postData.commitMessage} />
+        {/* 投稿ボタン */}
+        <PostButton onPress={handlePost} loading={loading} />
       </ScrollView>
       {/* カスタムポップアップ */}
       <CustomAlert
