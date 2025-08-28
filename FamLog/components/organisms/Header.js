@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const PostHeader = () => {
+const Header = () => {
   return (
     <View style={styles.header}>
       {/* 左側のハンバーガーメニュー */}
@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostHeader;
+export default Header;
