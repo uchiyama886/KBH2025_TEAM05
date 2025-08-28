@@ -10,23 +10,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFetchPosts } from '../../hooks/useFetchPosts';
 import { usePraise } from '../../hooks/usePraise';
 import { useComment } from '../../hooks/useComment';
-import { useAuthContext } from '../../hooks/useAuthContext'; // 変更: useAuthContextをインポート
-import TimeLine from '../../components/organisms/TimeLine';
+import { useAuthContext } from '../../hooks/useAuthContext';
+import { useFocusEffect } from '@react-navigation/native';
+import Timeline from '../../components/organisms/Timeline';
 
-const TimeLinePage = () => {
-  const { posts: initialPosts, loading, error } = useFetchPosts();
+const TimelinePage = () => {
+  const { posts: initialPosts, loading, error, fetchPosts } = useFetchPosts();
   const { addPraise } = usePraise();
   const { addComment } = useComment();
-  const { session } = useAuthContext(); // 変更: useAuthContextからセッション情報を取得
+  const { session } = useAuthContext();
   const [timelinePosts, setTimelinePosts] = useState([]);
   const [commentText, setCommentText] = useState({});
-
 
   useEffect(() => {
     if (initialPosts) {
       setTimelinePosts(initialPosts);
     }
   }, [initialPosts]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [fetchPosts])
+  );
 
   const handlePraise = useCallback(async (postId) => {
     const userId = session?.user?.id;
@@ -37,16 +43,16 @@ const TimeLinePage = () => {
           prevPosts.map(post =>
             post.id === postId
               ? {
-                ...post,
-                praises: [
-                  ...post.praises,
-                  {
-                    created_at: new Date().toISOString(),
-                    praiser_id: userId,
-                    users: { name: session.user.name || "あなた" }
-                  }
-                ]
-              }
+                  ...post,
+                  praises: [
+                    ...post.praises,
+                    {
+                      created_at: new Date().toISOString(),
+                      praiser_id: userId,
+                      users: { name: session.user.name || "あなた" }
+                    }
+                  ]
+                }
               : post
           )
         );
@@ -66,12 +72,12 @@ const TimeLinePage = () => {
           prevPosts.map(post =>
             post.id === postId
               ? {
-                ...post,
-                comments: [
-                  ...post.comments,
-                  { created_at: new Date().toISOString(), content: content, users: { name: session.user.name || "あなた" } }
-                ]
-              }
+                  ...post,
+                  comments: [
+                    ...post.comments,
+                    { created_at: new Date().toISOString(), content: content, users: { name: session.user.name || "あなた" } }
+                  ]
+                }
               : post
           )
         );
@@ -103,14 +109,14 @@ const TimeLinePage = () => {
 
   return (
     <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
-      <TimeLine
-        posts={timelinePosts}
-        session={session}
-        commentText={commentText}
-        onPraise={handlePraise}
-        onAddComment={handleAddComment}
-        onCommentChange={(postId, text) => setCommentText(prev => ({ ...prev, [postId]: text }))}
-      />
+        <Timeline
+          posts={timelinePosts}
+          session={session}
+          commentText={commentText}
+          onPraise={handlePraise}
+          onAddComment={handleAddComment}
+          onCommentChange={(postId, text) => setCommentText(prev => ({ ...prev, [postId]: text }))}
+        />
     </LinearGradient>
   );
 };
@@ -155,4 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TimeLinePage;
+export default TimelinePage;

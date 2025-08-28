@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet } from 'react-native';
 import PostCard from './PostCard';
 import AuthContext from '../../hooks/useAuthContext'
 
-const TimeLine = ({
+const Timeline = ({
   posts,
   session,
   commentText,
@@ -40,4 +40,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TimeLine;
+export default Timeline;

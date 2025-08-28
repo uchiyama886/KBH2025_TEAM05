@@ -13,7 +13,7 @@ const Header = () => {
       {/* 中央のタイトル部分 */}
       <View style={styles.centerContainer}>
         <Ionicons name="heart" size={24} color="#FF69B4" style={styles.heartIcon} />
-        <Text style={styles.titleText}>Family-Sync</Text>
+        <Text style={styles.titleText}>FamLog</Text>
       </View>
 
       {/* 右側の通知アイコンと赤い点 */}
