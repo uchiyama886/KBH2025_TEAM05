@@ -1,21 +1,21 @@
 import 'react-native-url-polyfill/auto';
-import { useState, useEffect } from 'react';
-import { supabase } from './utils/supabase';
 import { NavigationContainer } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 import { useAuth } from './hooks/useAuth';
+import { AuthContext } from './hooks/useAuthContext';
 
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 
 export default function App() {
-
   const { session } = useAuth();
   
   return (
-    <NavigationContainer>
-      {session ? <AppNavigator/> : <AuthNavigator/> } 
-    </NavigationContainer>
+    <AuthContext.Provider value={{ session }}>
+      <NavigationContainer>
+        {session ? <AppNavigator/> : <AuthNavigator/> } 
+      </NavigationContainer>
+    </AuthContext.Provider>
   );
 }
 

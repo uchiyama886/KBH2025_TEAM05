@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 
 export const useFetchPosts = () => {
@@ -6,50 +6,39 @@ export const useFetchPosts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            users (
-              name,
-              profile_image_url
-            ),
-            praises (
-              created_at,
-              users (
-                name
-              )
-            ),
-            comments (
-              created_at,
-              content,
-              users (
-                name
-              )
-            )
-          `)
-          .order('created_at', { ascending: false });
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          users (
+            id,
+            name,
+            profile_image_url
+          ),
+          praises (*, users (name)),
+          comments (*, users (name))
+        `)
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          throw error;
-        }
-
-        setPosts(data);
-        setError(null);
-      } catch (err) {
-        setError(err);
-        console.error('投稿の取得に失敗しました:', err);
-      } finally {
-        setLoading(false);
+      if (error) {
+        throw error;
       }
-    };
-
-    fetchPosts();
+      setPosts(data);
+      setError(null);
+    } catch (err) {
+      setError(err);
+      console.error("投稿の取得中にエラーが発生しました:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { posts, loading:false, error };
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  return { posts, loading, error, fetchPosts };
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const PostHeader = () => {
+const Header = () => {
   return (
     <View style={styles.header}>
       {/* 左側のハンバーガーメニュー */}
@@ -13,7 +13,7 @@ const PostHeader = () => {
       {/* 中央のタイトル部分 */}
       <View style={styles.centerContainer}>
         <Ionicons name="heart" size={24} color="#FF69B4" style={styles.heartIcon} />
-        <Text style={styles.titleText}>Family-Sync</Text>
+        <Text style={styles.titleText}>FamLog</Text>
       </View>
 
       {/* 右側の通知アイコンと赤い点 */}
@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostHeader;
+export default Header;
