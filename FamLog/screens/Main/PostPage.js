@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { usePost } from '../../hooks/usePost';
-import CategorySelector from '../../components/molecules/CategorySelector';
-import PostHeader from '../../components/molecules/PostHeader';
-import UserInfo from '../../components/molecules/UserInfo';
-import PostInput from '../../components/molecules/PostInput';
-import CommitMessageDisplay from '../../components/molecules/CommitMessageDisplay';
-import StampSelector from '../../components/molecules/StampSelector';
-import PostButton from '../../components/molecules/PostButton';
+import Postlist from '../../components/organisms/PostList'
+import { useNavigation } from '@react-navigation/native';
 
 const PostPage = () => {
   const [description, setDescription] = useState('');
@@ -15,6 +10,7 @@ const PostPage = () => {
   const [selectedEmoji, setSelectedEmoji] = useState(null);
 
   const { createPost, loading } = usePost();
+  const navi = useNavigation();
 
   const generateCommitMessage = () => {
     if (!description || !selectedCategory) {
@@ -22,7 +18,6 @@ const PostPage = () => {
     }
     return `feat(${selectedCategory}): ${description.substring(0, 20)}...`;
   };
-  const commitMessage = generateCommitMessage();
 
   const handlePost = async () => {
     if (!description || !selectedCategory || !selectedEmoji) {
@@ -36,37 +31,20 @@ const PostPage = () => {
       Alert.alert('成功', '投稿が完了しました！');
       setDescription('');
       setSelectedCategory(null);
-      setSelectedEmoji(null);
-    } else {
+      setSelectedEmoji(null);      
       Alert.alert('エラー', '投稿に失敗しました。もう一度お試しください。');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <PostHeader />
-      <ScrollView style={styles.content}>
-        <UserInfo />
-        <PostInput 
-          description={description} 
-          setDescription={setDescription} 
-        />
-        <CategorySelector 
-          selectedCategory={selectedCategory} 
-          onSelectCategory={setSelectedCategory} 
-        />
-        <CommitMessageDisplay 
-          commitMessage={commitMessage} 
-        />
-        <StampSelector 
-          selectedEmoji={selectedEmoji} 
-          onSelectEmoji={setSelectedEmoji} 
-        />
+      <ScrollView style={styles.content}>       
+        <Postlist />
+      
+        
+        
       </ScrollView>
-      <PostButton 
-        onPress={handlePost} 
-        loading={loading} 
-      />
+      
     </SafeAreaView>
   );
 };
