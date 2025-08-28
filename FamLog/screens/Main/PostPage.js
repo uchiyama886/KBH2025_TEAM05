@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { usePost } from '../../hooks/usePost';
 import CategorySelector from '../../components/molecules/CategorySelector';
-import PostHeader from '../../components/molecules/PostHeader';
 import UserInfo from '../../components/molecules/UserInfo';
-import PostInput from '../../components/molecules/PostInput';
 import CommitMessageDisplay from '../../components/molecules/CommitMessageDisplay';
 import StampSelector from '../../components/molecules/StampSelector';
-import PostButton from '../../components/molecules/PostButton';
+import Postlist from '../../components/organisms/PostList'
 
 const PostPage = () => {
   const [description, setDescription] = useState('');
@@ -44,29 +42,13 @@ const PostPage = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <PostHeader />
-      <ScrollView style={styles.content}>
-        <UserInfo />
-        <PostInput 
-          description={description} 
-          setDescription={setDescription} 
-        />
-        <CategorySelector 
-          selectedCategory={selectedCategory} 
-          onSelectCategory={setSelectedCategory} 
-        />
-        <CommitMessageDisplay 
-          commitMessage={commitMessage} 
-        />
-        <StampSelector 
-          selectedEmoji={selectedEmoji} 
-          onSelectEmoji={setSelectedEmoji} 
-        />
+      <ScrollView style={styles.content}>       
+        <Postlist />
+      
+        
+        
       </ScrollView>
-      <PostButton 
-        onPress={handlePost} 
-        loading={loading} 
-      />
+      
     </SafeAreaView>
   );
 };
