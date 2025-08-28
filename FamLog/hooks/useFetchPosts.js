@@ -1,5 +1,3 @@
-// useFetchPosts.js
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 
@@ -11,10 +9,10 @@ export const useFetchPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // postsテーブルと、postsテーブルのuser_idに関連付けられたusersテーブルのデータを取得
+        // クエリをシンプルに修正
         const { data, error } = await supabase
           .from('posts')
-          .select('*, public.users(name, avatar_url)') // 修正点
+          .select('id, user_id, content, tags, emoji, created_at, users(name, profile_image_url)')
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -30,8 +28,6 @@ export const useFetchPosts = () => {
     };
 
     fetchPosts();
-
-    // ... (リアルタイムリスナーのコードはそのまま) ...
   }, []);
 
   return { posts, loading, error };
