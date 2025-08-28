@@ -23,6 +23,7 @@ const TimelinePage = () => {
   const { session } = useAuth();
   const [timelinePosts, setTimelinePosts] = useState([]);
   const [commentText, setCommentText] = useState({});
+  
 
   useEffect(() => {
     if (initialPosts) {
@@ -42,7 +43,12 @@ const TimelinePage = () => {
                   ...post,
                   praises: [
                     ...post.praises,
-                    { created_at: new Date().toISOString(), users: { name: session.user.name || "あなた" } }
+                    { 
+                      created_at: new Date().toISOString(), 
+                      // praises_idをpraiser_idに修正
+                      praiser_id: userId,
+                      users: { name: session.user.name || "あなた" }
+                    }
                   ]
                 }
               : post
@@ -54,6 +60,7 @@ const TimelinePage = () => {
 
   const handleAddComment = useCallback(async (postId) => {
     const userId = session?.user?.id;
+    
     const content = commentText[postId];
     console.log(userId,content);
     if (userId && content && content.trim() !== '') {
@@ -119,9 +126,11 @@ const TimelinePage = () => {
               <Text style={styles.message}>{item.content}</Text>
 
               <View style={styles.praiseSection}>
-                <TouchableOpacity onPress={() => handlePraise(item.id)}>
-                  <Text style={styles.praiseIcon}>❤️</Text>
-                </TouchableOpacity>
+                {session ? (
+                  <TouchableOpacity onPress={() => handlePraise(item.id)}>
+                    <Text style={styles.praiseIcon}>❤️</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <Text style={styles.praiseCount}>
                   {item.praises?.length || 0}
                 </Text>
@@ -140,20 +149,22 @@ const TimelinePage = () => {
                     ))}
                   </View>
                 )}
-                <View style={styles.commentInputRow}>
-                  <TextInput
-                    style={styles.commentInput}
-                    placeholder="コメントを追加..."
-                    value={commentText[item.id] || ''}
-                    onChangeText={(text) => setCommentText(prev => ({ ...prev, [item.id]: text }))}
-                  />
-                  <TouchableOpacity 
-                    style={styles.commentSendButton}
-                    onPress={() => handleAddComment(item.id)}
-                  >
-                    <Text style={styles.commentSendText}>送信</Text>
-                  </TouchableOpacity>
-                </View>
+                {session ? (
+                  <View style={styles.commentInputRow}>
+                    <TextInput
+                      style={styles.commentInput}
+                      placeholder="コメントを追加..."
+                      value={commentText[item.id] || ''}
+                      onChangeText={(text) => setCommentText(prev => ({ ...prev, [item.id]: text }))}
+                    />
+                    <TouchableOpacity 
+                      style={styles.commentSendButton}
+                      onPress={() => handleAddComment(item.id)}
+                    >
+                      <Text style={styles.commentSendText}>送信</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
               </View>
             </View>
           )}

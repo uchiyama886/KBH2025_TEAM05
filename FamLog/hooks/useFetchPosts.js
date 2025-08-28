@@ -51,5 +51,5 @@ export const useFetchPosts = () => {
     fetchPosts();
   }, []);
 
-  return { posts, loading, error };
+  return { posts, loading:false, error };
 };

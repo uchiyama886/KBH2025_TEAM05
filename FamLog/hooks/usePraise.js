@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { supabase } from '../utils/supabase'; // あなたのプロジェクトのパスに合わせて調整してください
+import { supabase } from '../utils/supabase'; // utils/supabaseにパスを修正
 
 export const usePraise = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const addPraise = async (praiserId, postId) => {
+  const addPraise = async (postId, userId) => {
     setLoading(true);
     try {
-      // 'praises' テーブルに新しい「いいね！」データを挿入
       const { data, error } = await supabase
         .from('praises')
         .insert([
-          { praiser_id: praiserId, post_id: postId }
+          { 
+            post_id: postId, 
+            praiser_id: userId // praises_idをpraiser_idに修正
+          }
         ]);
 
       if (error) {
@@ -20,11 +22,11 @@ export const usePraise = () => {
       }
 
       setError(null);
-      return data; // 挿入されたデータを返す
+      return true;
     } catch (err) {
       setError(err);
-      console.error('「いいね！」の保存に失敗しました:', err);
-      return null;
+      console.error('「いいね！」の保存に失敗しました:', err.message);
+      return false;
     } finally {
       setLoading(false);
     }
