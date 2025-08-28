@@ -58,7 +58,6 @@ const PostPage = () => {
         setDescription={setDescription}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-        // 変更: selectedEmojisとsetSelectedEmojisを渡す
         selectedEmojis={selectedEmojis}
         setSelectedEmojis={setSelectedEmojis}
         handlePost={handlePost}

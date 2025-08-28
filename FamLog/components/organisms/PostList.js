@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // usePostのインポートを削除
 
-import UserInfo from '../molecules/UserInfo';
 import CategorySelector from '../molecules/CategorySelector';
 import CommitMessageDisplay from '../molecules/CommitMessageDisplay';
 import StampSelector from '../molecules/StampSelector';
 import PostButton from '../molecules/PostButton';
 import PostInput from '../molecules/PostInput';
-import CustomAlert from '../molecules/CustomAlert';
 
 // 変更: propsとしてselectedEmojisとsetSelectedEmojisを受け取る
 const Postlist = ({ 
@@ -37,7 +34,6 @@ const Postlist = ({
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.userInfoContainer}>
-        <UserInfo />
       </View>
       <ScrollView style={styles.content}>
         <PostInput 
