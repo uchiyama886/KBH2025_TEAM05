@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../supabaseClient'; // あなたのプロジェクトのパスに合わせて調整してください
+import { supabase } from '../utils/supabase'; // あなたのプロジェクトのパスに合わせて調整してください
 
 export const usePraise = () => {
   const [loading, setLoading] = useState(false);

@@ -9,10 +9,29 @@ export const useFetchPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // クエリをシンプルに修正
+        setLoading(true);
         const { data, error } = await supabase
           .from('posts')
-          .select('id, user_id, content, tags, emoji, created_at, users(name, profile_image_url)')
+          .select(`
+            *,
+            users (
+              name,
+              profile_image_url
+            ),
+            praises (
+              created_at,
+              users (
+                name
+              )
+            ),
+            comments (
+              created_at,
+              content,
+              users (
+                name
+              )
+            )
+          `)
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -20,8 +39,10 @@ export const useFetchPosts = () => {
         }
 
         setPosts(data);
+        setError(null);
       } catch (err) {
         setError(err);
+        console.error('投稿の取得に失敗しました:', err);
       } finally {
         setLoading(false);
       }
