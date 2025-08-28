@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import PostCard from './PostCard';
+import AuthContext from '../../hooks/useAuthContext'
 
 const TimeLine = ({
   posts,
@@ -14,7 +15,7 @@ const TimeLine = ({
     <PostCard
       post={item}
       session={session}
-      commentText={commentText} // 変更: commentTextを渡す
+      commentText={commentText}
       onPraise={onPraise}
       onAddComment={onAddComment}
       onCommentChange={onCommentChange}

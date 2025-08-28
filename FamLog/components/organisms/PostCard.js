@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native'; // Imageをインポート
+import { View, Text, StyleSheet, Image } from 'react-native';
 import InteractionSection from '../molecules/InteractionSection';
 
 const PostCard = ({
@@ -14,14 +14,13 @@ const PostCard = ({
     <View style={styles.card}>
       {/* ユーザー情報とメッセージ */}
       <View style={styles.userRow}>
-        {/* プロフィールアイコンの表示ロジックを追加 */}
+        {/* プロフィールアイコンの表示ロジック */}
         {post.users?.profile_image_url ? (
           <Image
             source={{ uri: post.users.profile_image_url }}
             style={styles.profileImage}
           />
         ) : (
-          // アイコンがない場合のプレースホルダー
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarText}>
               {post.users?.name ? post.users.name.charAt(0) : '？'}
@@ -60,14 +59,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  // プロフィール画像のスタイル
   profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
     marginRight: 10,
   },
-  // プレースホルダーのスタイル
   avatarPlaceholder: {
     width: 40,
     height: 40,

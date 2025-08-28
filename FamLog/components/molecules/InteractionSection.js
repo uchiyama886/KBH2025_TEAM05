@@ -12,13 +12,21 @@ const InteractionSection = ({
   onAddComment,
   onCommentChange,
 }) => {
+  // ログインしているユーザーがすでに「いいね」しているか判定
+  const hasPraised = praises?.some(praise => praise.praiser_id === session?.user?.id);
+
   return (
     <View style={styles.container}>
       {/* いいねセクション */}
       <View style={styles.praiseSection}>
         {session ? (
-          <TouchableOpacity onPress={() => onPraise(postId)}>
-            <Text style={styles.praiseIcon}>❤️</Text>
+          <TouchableOpacity
+            onPress={() => onPraise(postId)}
+            disabled={hasPraised} // 既にいいねしている場合はボタンを無効化
+          >
+            <Text style={[styles.praiseIcon, hasPraised && styles.praisedIcon]}>
+              ❤️
+            </Text>
           </TouchableOpacity>
         ) : null}
         <Text style={styles.praiseCount}>
@@ -75,6 +83,10 @@ const styles = StyleSheet.create({
   praiseIcon: {
     fontSize: 24,
     marginRight: 8,
+    color: 'grey', // いいねしていないときのデフォルトの色
+  },
+  praisedIcon: {
+    color: 'red', // いいね済みの色
   },
   praiseCount: {
     fontSize: 16,

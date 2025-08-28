@@ -9,18 +9,18 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useFetchPosts } from '../../hooks/useFetchPosts';
 import { usePraise } from '../../hooks/usePraise';
-import { useAuth } from '../../hooks/useAuth';
 import { useComment } from '../../hooks/useComment';
-import Timeline from '../../components/organisms/TimeLine';
+import { useAuthContext } from '../../hooks/useAuthContext'; // 変更: useAuthContextをインポート
+import TimeLine from '../../components/organisms/TimeLine';
 
-const TimelinePage = () => {
+const TimeLinePage = () => {
   const { posts: initialPosts, loading, error } = useFetchPosts();
   const { addPraise } = usePraise();
   const { addComment } = useComment();
-  const { session } = useAuth();
+  const { session } = useAuthContext(); // 変更: useAuthContextからセッション情報を取得
   const [timelinePosts, setTimelinePosts] = useState([]);
   const [commentText, setCommentText] = useState({});
-  
+
 
   useEffect(() => {
     if (initialPosts) {
@@ -37,16 +37,16 @@ const TimelinePage = () => {
           prevPosts.map(post =>
             post.id === postId
               ? {
-                  ...post,
-                  praises: [
-                    ...post.praises,
-                    { 
-                      created_at: new Date().toISOString(), 
-                      praiser_id: userId,
-                      users: { name: session.user.name || "あなた" }
-                    }
-                  ]
-                }
+                ...post,
+                praises: [
+                  ...post.praises,
+                  {
+                    created_at: new Date().toISOString(),
+                    praiser_id: userId,
+                    users: { name: session.user.name || "あなた" }
+                  }
+                ]
+              }
               : post
           )
         );
@@ -56,9 +56,9 @@ const TimelinePage = () => {
 
   const handleAddComment = useCallback(async (postId) => {
     const userId = session?.user?.id;
-    
+
     const content = commentText[postId];
-    console.log(userId,content);
+    console.log(userId, content);
     if (userId && content && content.trim() !== '') {
       const success = await addComment(postId, userId, content);
       if (success) {
@@ -66,12 +66,12 @@ const TimelinePage = () => {
           prevPosts.map(post =>
             post.id === postId
               ? {
-                  ...post,
-                  comments: [
-                    ...post.comments,
-                    { created_at: new Date().toISOString(), content: content, users: { name: session.user.name || "あなた" } }
-                  ]
-                }
+                ...post,
+                comments: [
+                  ...post.comments,
+                  { created_at: new Date().toISOString(), content: content, users: { name: session.user.name || "あなた" } }
+                ]
+              }
               : post
           )
         );
@@ -103,14 +103,14 @@ const TimelinePage = () => {
 
   return (
     <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
-        <Timeline
-          posts={timelinePosts}
-          session={session}
-          commentText={commentText}
-          onPraise={handlePraise}
-          onAddComment={handleAddComment}
-          onCommentChange={(postId, text) => setCommentText(prev => ({ ...prev, [postId]: text }))}
-        />
+      <TimeLine
+        posts={timelinePosts}
+        session={session}
+        commentText={commentText}
+        onPraise={handlePraise}
+        onAddComment={handleAddComment}
+        onCommentChange={(postId, text) => setCommentText(prev => ({ ...prev, [postId]: text }))}
+      />
     </LinearGradient>
   );
 };
@@ -155,4 +155,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TimelinePage;
+export default TimeLinePage;
