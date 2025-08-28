@@ -6,6 +6,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
+
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Supabase URL and API Key must be set in your environment variables.");
 }

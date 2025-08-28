@@ -1,35 +1,45 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { supabase } from '../../utils/storage';
+import { supabase } from '../../utils/supabase'; // Correct import path
 import { useNavigation } from '@react-navigation/native';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigation = useNavigation();
 
   const handleSignUp = () => {
-    // 新規登録ボタンが押されたらSignOn画面へ遷移
     navigation.navigate('SignOn');
   };
 
   const handleSignIn = async () => {
     setLoading(true);
+    setErrorMessage('');
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+
     setLoading(false);
 
     if (error) {
-      Alert.alert('ログインエラー', error.message);
+      setErrorMessage(error.message);
     } else {
-      // ログイン成功後にTimeline画面へ遷移
-      navigation.navigate('Timeline');
+      // ログインが成功すると、App.jsが自動でナビゲーションを切り替えます
+      Alert.alert('ログイン成功', 'タイムラインに移動します。');
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ようこそ！</Text>
+      
+      {errorMessage ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
       <TextInput
         style={styles.input}
         placeholder="メールアドレス"
@@ -77,6 +87,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  errorContainer: {
+    backgroundColor: '#ffdddd',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#d9534f',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   input: {
     width: '100%',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { supabase } from '../../utils/storage';
+import { supabase } from '../../utils/supabase'; // Correct import path
 import { useNavigation } from '@react-navigation/native';
 
 const SignOnPage = () => {
@@ -11,17 +11,37 @@ const SignOnPage = () => {
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
 
-    if (error) {
-      Alert.alert('サインアップエラー', error.message);
-    } else {
-      Alert.alert('成功', '確認メールを送信しました。メールのリンクをクリックしてアカウントを有効にしてください。');
-      setEmail('');
-      setPassword('');
-      navigation.goBack(); // サインアップ成功後にログイン画面に戻る
+    const { data, error: authError } = await supabase.auth.signUp({ email, password });
+
+    if (authError) {
+      setLoading(false);
+      Alert.alert('サインアップエラー', authError.message);
+      return;
     }
+
+    if (data.user) {
+      // ユーザー情報の挿入
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([{
+          id: data.user.id,
+          name: '新規ユーザー',
+          role: 'child',
+          profile_image_url: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+        }]);
+
+      if (insertError) {
+        setLoading(false);
+        Alert.alert('データ登録エラー', 'ユーザー情報の登録中に問題が発生しました。');
+        console.error('ユーザーデータ挿入エラー:', insertError);
+        return;
+      }
+    }
+
+    setLoading(false);
+    // サインアップが成功したら、App.jsのロジックが自動的に画面を切り替えます
+    Alert.alert('登録完了', 'アカウントが作成されました！');
   };
 
   return (
@@ -87,7 +107,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 10,
   },
   buttonText: {
     color: '#fff',
