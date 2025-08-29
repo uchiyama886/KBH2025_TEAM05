@@ -12,7 +12,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "extra": {
+      "prompts": "./utils/propmts",
       "supabaseUrl": "${SUPABASE_URL}",
       "supabaseAnonKey": "${SUPABASE_ANON_KEY}"
     },

@@ -6,29 +6,25 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Dimensions,
+  ScrollView,
+  Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { BarChart } from "react-native-chart-kit";
+import { BarChart, PieChart } from "react-native-chart-kit";
 
-// useFetchPostsをインポート
 import { useFetchPosts } from "../../hooks/useFetchPosts";
+import SummaryModal from '../../components/organisms/SummaryModal';
 
-// 画面の幅を取得
 const screenWidth = Dimensions.get("window").width;
 
-/**
- * 投稿データから貢献度グラフ用のデータを生成
- * @param {Array} posts - 取得した投稿データ
- * @returns {{labels: Array, datasets: Array}}
- */
+// ... (getChartData, calculateMVP, getCategoryChartData, getEmojiChartData の関数は省略) ...
 const getChartData = (posts) => {
   const contributionMap = {};
   const today = new Date();
   const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
   const labels = [];
 
-  // 過去7日間の日付をキーとして初期化
   for (let i = 6; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
@@ -37,7 +33,6 @@ const getChartData = (posts) => {
     labels.push(day);
   }
 
-  // データを日付ごとに集計
   posts.forEach((post) => {
     const date = new Date(post.created_at);
     const day = daysOfWeek[date.getDay()];
@@ -58,11 +53,6 @@ const getChartData = (posts) => {
   };
 };
 
-/**
- * 貢献度が最も高いユーザーを計算（今週のMVP）
- * @param {Array} posts - 取得した投稿データ
- * @returns {{name: string, commits: number}|null} MVPのユーザー情報、またはnull
- */
 const calculateMVP = (posts) => {
   const commitCounts = {};
   posts.forEach((post) => {
@@ -70,7 +60,6 @@ const calculateMVP = (posts) => {
     if (commitCounts[userId]) {
       commitCounts[userId].commits++;
     } else {
-      // ユーザー情報がネストされていると仮定
       commitCounts[userId] = {
         name: post.users.name,
         commits: 1,
@@ -91,11 +80,76 @@ const calculateMVP = (posts) => {
   return mvp;
 };
 
+const getCategoryChartData = (posts) => {
+  const categoryMap = {};
+  posts.forEach((post) => {
+    if (post.tags) {
+      if (categoryMap[post.tags]) {
+        categoryMap[post.tags]++;
+      } else {
+        categoryMap[post.tags] = 1;
+      }
+    }
+  });
+
+  const labels = Object.keys(categoryMap);
+  const data = labels.map((tag) => categoryMap[tag]);
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        data: data,
+      },
+    ],
+  };
+};
+
+const getEmojiChartData = (posts) => {
+  const emojiMap = {};
+  posts.forEach((post) => {
+    if (post.emojis && Array.isArray(post.emojis)) {
+      post.emojis.forEach((emoji) => {
+        if (emojiMap[emoji]) {
+          emojiMap[emoji]++;
+        } else {
+          emojiMap[emoji] = 1;
+        }
+      });
+    }
+  });
+
+  const sortedEmojis = Object.entries(emojiMap)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .slice(0, 5);
+
+  const data = sortedEmojis.map(([emoji, count], index) => ({
+    name: emoji,
+    population: count,
+    color: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+    legendFontColor: '#7F7F7F',
+    legendFontSize: 15,
+  }));
+
+  return data;
+};
+
 const DashboardPage = () => {
-  // useFetchPostsフックを使用してデータを取得
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  
   const { posts, loading, error } = useFetchPosts();
   const chartData = getChartData(posts);
   const mvp = calculateMVP(posts);
+  const categoryChartData = getCategoryChartData(posts);
+  const emojiChartData = getEmojiChartData(posts);
+
+  const handleOpenModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+  };
 
   if (loading) {
     return (
@@ -117,44 +171,99 @@ const DashboardPage = () => {
   return (
     <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.sectionTitle}>今週の貢献度</Text>
-          <View style={styles.chartContainer}>
-            <BarChart
-              data={chartData}
-              width={screenWidth - 40}
-              height={220}
-              yAxisLabel=""
-              chartConfig={{
-                backgroundGradientFrom: "#fff",
-                backgroundGradientTo: "#fff",
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(223, 75, 120, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(68, 68, 68, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
-                propsForBackgroundLines: {
-                  strokeDasharray: "",
-                },
-              }}
-              style={styles.chart}
-            />
-          </View>
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.contentContainer}>
+            <Text style={styles.sectionTitle}>今週の貢献度</Text>
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={chartData}
+                width={screenWidth - 40}
+                height={220}
+                yAxisLabel=""
+                chartConfig={{
+                  backgroundGradientFrom: "#fff",
+                  backgroundGradientTo: "#fff",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(223, 75, 120, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(68, 68, 68, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: "",
+                  },
+                }}
+                style={styles.chart}
+              />
+            </View>
 
-          <View style={styles.mvpContainer}>
-            <Text style={styles.sectionTitle}>今週のMVP</Text>
-            {mvp ? (
-              <View style={styles.mvpCard}>
-                <Ionicons name="trophy-outline" size={30} color="#FFD700" />
-                <Text style={styles.mvpText}>{mvp.name}</Text>
-                <Text style={styles.mvpCommitsText}>{mvp.commits}投稿</Text>
-              </View>
-            ) : (
-              <Text>今週の投稿はありません</Text>
-            )}
+            <Text style={styles.sectionTitle}>カテゴリー別投稿数</Text>
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={categoryChartData}
+                width={screenWidth - 40}
+                height={220}
+                yAxisLabel=""
+                chartConfig={{
+                  backgroundGradientFrom: "#fff",
+                  backgroundGradientTo: "#fff",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(74, 144, 226, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(68, 68, 68, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: "",
+                  },
+                }}
+                style={styles.chart}
+              />
+            </View>
+
+            <Text style={styles.sectionTitle}>絵文字の使用頻度</Text>
+            <View style={styles.chartContainer}>
+              <PieChart
+                data={emojiChartData}
+                width={screenWidth - 40}
+                height={220}
+                chartConfig={{
+                  color: (opacity = 1) => `rgba(255, 141, 161, ${opacity})`,
+                }}
+                accessor={"population"}
+                backgroundColor={"transparent"}
+                paddingLeft={"15"}
+                absolute
+              />
+            </View>
+
+            <View style={styles.mvpContainer}>
+              <Text style={styles.sectionTitle}>今週のMVP</Text>
+              {mvp ? (
+                <View style={styles.mvpCard}>
+                  <Ionicons name="trophy-outline" size={30} color="#FFD700" />
+                  <Text style={styles.mvpText}>{mvp.name}</Text>
+                  <Text style={styles.mvpCommitsText}>{mvp.commits}投稿</Text>
+                </View>
+              ) : (
+                <Text>今週の投稿はありません</Text>
+              )}
+            </View>
           </View>
-        </View>
+        </ScrollView>
+        <Pressable style={styles.playButton} onPress={handleOpenModal}>
+          <Ionicons name="play-circle" size={60} color="#FF8DA1" />
+        </Pressable>
+        
+        {/* SummaryModalにデータを渡す */}
+        <SummaryModal 
+          isVisible={isModalVisible} 
+          onClose={handleCloseModal}
+          chartData={chartData}
+          mvp={mvp}
+          categoryChartData={categoryChartData}
+          emojiChartData={emojiChartData}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -162,6 +271,9 @@ const DashboardPage = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   loadingContainer: {
@@ -176,9 +288,8 @@ const styles = StyleSheet.create({
     color: "#444",
   },
   contentContainer: {
-    flex: 1,
     padding: 20,
-    marginBottom: 60,
+    paddingBottom: 80,
   },
   sectionTitle: {
     fontSize: 20,
@@ -224,6 +335,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     color: "#888",
+  },
+  playButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#fff",
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
 

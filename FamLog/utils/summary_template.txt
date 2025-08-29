@@ -1,0 +1,200 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, Pressable, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Speech from 'expo-speech';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
+import { summarizeWithAI } from '../../api/openrouter';
+
+const SummaryModal = ({ isVisible, onClose, chartData, mvp, categoryChartData, emojiChartData }) => {
+  const [summary, setSummary] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchSummary();
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (summary && !loading) {
+      speak();
+    }
+  }, [summary, loading]);
+
+  const generatePrompt = async () => {
+    let templateText = '';
+    
+    if (Platform.OS === 'web') {
+      try {
+        const response = await fetch('/assets/prompts/summary_template.txt');
+        templateText = await response.text();
+      } catch (error) {
+        console.error("Webでのテンプレート読み込みに失敗しました:", error);
+        return "データの要約に失敗しました。";
+      }
+    } else {
+      try {
+        const asset = Asset.fromModule(require('../../../assets/prompts/summary_template.txt'));
+        await asset.downloadAsync();
+        const templateUri = asset.localUri || asset.uri;
+        templateText = await FileSystem.readAsStringAsync(templateUri);
+      } catch (error) {
+        console.error("ネイティブでのテンプレート読み込みに失敗しました:", error);
+        return "データの要約に失敗しました。";
+      }
+    }
+
+    const contributionData = chartData.datasets[0].data.map((count, index) => `${chartData.labels[index]}曜日: ${count}件`).join('、');
+    
+    let mvpName = 'まだ投稿がありません';
+    let mvpCommits = '';
+    let mvpNoPosts = '';
+    if (mvp) {
+      mvpName = mvp.name;
+      mvpCommits = `${mvp.commits}件`;
+      mvpNoPosts = '';
+    } else {
+      mvpName = '';
+      mvpCommits = '';
+      mvpNoPosts = '残念ながら、今週はまだ投稿がありません。';
+    }
+    
+    const categoryData = categoryChartData.datasets[0].data.map((count, index) => `${categoryChartData.labels[index]}: ${count}件`).join('、');
+    
+    let emojiData = '';
+    if (emojiChartData && emojiChartData.length > 0) {
+      const emojiString = emojiChartData.map(item => `${item.name}が${item.population}回`).join('、');
+      emojiData = `そして、人気を集めた絵文字は、${emojiString}でした！`;
+    } else {
+      emojiData = "今週は絵文字の投稿がありませんでした。";
+    }
+    
+    let prompt = templateText
+      .replace('{contributionData}', contributionData)
+      .replace('{mvpName}', mvpName)
+      .replace('{mvpCommits}', mvpCommits)
+      .replace('{mvpNoPosts}', mvpNoPosts)
+      .replace('{categoryData}', categoryData)
+      .replace('{emojiData}', emojiData);
+    
+    return prompt;
+  };
+
+  const fetchSummary = async () => {
+    setLoading(true);
+    const prompt = await generatePrompt();
+    const aiSummary = await summarizeWithAI(prompt);
+    setSummary(aiSummary);
+    setLoading(false);
+  };
+
+  const speak = () => {
+    Speech.speak(summary, { language: 'ja-JP' });
+    setIsPlaying(true);
+  };
+    
+  const stopSpeaking = () => {
+    Speech.stop();
+    setIsPlaying(false);
+  };
+    
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      stopSpeaking();
+    } else {
+      speak();
+    }
+  };
+      
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Pressable style={styles.closeButton} onPress={onClose}>
+            <Ionicons name="close-circle" size={30} color="#FF8DA1" />
+          </Pressable>
+          <Text style={styles.modalTitle}>AIによる要約</Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#FF8DA1" />
+          ) : (
+            <>
+              <ScrollView contentContainerStyle={styles.summaryScrollView}>
+                <Text style={styles.summaryText}>{summary}</Text>
+              </ScrollView>
+              <Pressable style={styles.playPauseButton} onPress={handlePlayPause}>
+                <Ionicons name={isPlaying ? 'pause' : 'play'} size={40} color="#fff" />
+              </Pressable>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: '100%',
+    maxHeight: '80%', // モーダルの最大高さを設定
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  summaryScrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  summaryText: {
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  playPauseButton: {
+    backgroundColor: '#FF8DA1',
+    borderRadius: 50,
+    padding: 10,
+    elevation: 5,
+  },
+});
+
+export default SummaryModal;
