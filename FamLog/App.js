@@ -1,21 +1,26 @@
 import 'react-native-url-polyfill/auto';
 import { NavigationContainer } from '@react-navigation/native';
-import { StyleSheet } from 'react-native';
-import { useAuth } from './hooks/useAuth';
-import { AuthContext } from './hooks/useAuthContext';
+import { StyleSheet, View, Text } from 'react-native';
+import { AuthProvider, useAuth } from './hooks/useAuth'; // AuthProviderとuseAuthをインポート
 
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 
-export default function App() {
-  const { session } = useAuth();
-  
+function RootNavigation() {
+  const { session } = useAuth(); // useAuthからセッション状態を取得
+
   return (
-    <AuthContext.Provider value={{ session }}>
-      <NavigationContainer>
-        {session ? <AppNavigator/> : <AuthNavigator/> } 
-      </NavigationContainer>
-    </AuthContext.Provider>
+    <NavigationContainer>
+      {session ? <AppNavigator/> : <AuthNavigator/> } 
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RootNavigation />
+    </AuthProvider>
   );
 }
 

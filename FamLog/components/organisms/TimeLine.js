@@ -1,16 +1,18 @@
-import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import PostCard from './PostCard';
-import AuthContext from '../../hooks/useAuthContext'
+import { useAuth } from '../../hooks/useAuth'; // useAuthをインポートする
 
 const Timeline = ({
   posts,
-  session,
+  // session, <= Propsとして渡す必要はなくなります
   commentText,
   onPraise,
   onAddComment,
   onCommentChange,
 }) => {
+  // sessionをpropsで受け取るのではなく、ここで取得する
+  const { session } = useAuth();
+
   const renderItem = ({ item }) => (
     <PostCard
       post={item}
