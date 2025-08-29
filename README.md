@@ -2,7 +2,8 @@
 関西ビギナーズハッカソンVol.7のTeam-05の開発用リポジトリです。
 
 # FamLog
-<img width="158" height="48" alt="スクリーンショット 2025-08-29 11 54 11" src="https://github.com/user-attachments/assets/3dce559a-ae94-4b81-975c-68017b0d4d18" />
+
+<img width="500" height="500" alt="FamLog-removebg-preview" src="https://github.com/user-attachments/assets/f28141e1-f894-451c-bce4-676e956613df" />
 
 
 ---
@@ -15,9 +16,9 @@
 
 ## 2. アプリ画面のスクリーンショット
 
-<img width="491" height="664" alt="スクリーンショット 2025-08-29 11 33 06" src="https://github.com/user-attachments/assets/f22d1722-1ae2-4017-b3c7-9cce60a0e41d" />
-<img width="488" h<img width="488" height="663" alt="スクリーンショット 2025-08-29 11 33 25" src="https://github.com/user-attachments/assets/9a188aaf-27e6-49c6-952e-2e20fb9f6d3f" />
-<img width="488" height="660" alt="スクリーンショット 2025-08-29 11 33 16" src="https://github.com/user-attachments/assets/1e8a6d88-7313-484a-997b-09940ac6de0a" />
+<img width="220" height="471" alt="2025-08-29_12 02 23" src="https://github.com/user-attachments/assets/7389639f-e1b2-480e-8a8d-097acfdf35ed" />
+<img width="224" height="470" alt="2025-08-29_12 02 53" src="https://github.com/user-attachments/assets/c0b08f8b-1987-4679-86b6-7ec456d105c3" />
+<img width="217" height="466" alt="2025-08-29_12 07 31" src="https://github.com/user-attachments/assets/1dbe9e53-cdf8-45c5-99f1-94b8fe01237e" />
 
 
 ---
