@@ -1,25 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../hooks/useAuth';
 
 const Header = () => {
+  const { signOut } = useAuth(); // useAuthからsignOut関数を取得します
+
   return (
     <View style={styles.header}>
-      {/* 左側のハンバーガーメニュー */}
-      <TouchableOpacity style={styles.iconButton}>
-        <Ionicons name="menu-outline" size={28} color="#000" />
+      {/* 左側のログアウトボタン */}
+      <TouchableOpacity style={styles.iconButton} onPress={signOut}>
+        <Ionicons name="log-out-outline" size={28} color="#000" />
       </TouchableOpacity>
-
-      {/* 中央のタイトル部分 */}
+      {/* ...中央と右側のコンポーネントはそのまま... */}
       <View style={styles.centerContainer}>
         <Ionicons name="heart" size={24} color="#FF69B4" style={styles.heartIcon} />
         <Text style={styles.titleText}>FamLog</Text>
       </View>
-
-      {/* 右側の通知アイコンと赤い点 */}
       <TouchableOpacity style={styles.iconButton}>
         <Ionicons name="notifications-outline" size={28} color="#000" />
-        {/* 通知を示す赤い点 */}
         <View style={styles.notificationDot} />
       </TouchableOpacity>
     </View>
