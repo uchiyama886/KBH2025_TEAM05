@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Modal, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Speech from 'expo-speech'; // expo-speechをインポート
+import * as Speech from 'expo-speech';
 import { summarizeWithAI } from '../../api/openrouter';
 
 const SummaryModal = ({ isVisible, onClose, chartData, mvp, categoryChartData, emojiChartData }) => {
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false); // 読み上げの状態を管理
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
@@ -15,7 +15,6 @@ const SummaryModal = ({ isVisible, onClose, chartData, mvp, categoryChartData, e
     }
   }, [isVisible]);
   
-  // 要約が完了したら自動で読み上げを開始
   useEffect(() => {
     if (summary && !loading) {
       speak();
@@ -60,13 +59,11 @@ const SummaryModal = ({ isVisible, onClose, chartData, mvp, categoryChartData, e
     setLoading(false);
   };
   
-  // 音声読み上げを開始
   const speak = () => {
     Speech.speak(summary, { language: 'ja-JP' });
     setIsPlaying(true);
   };
 
-  // 音声読み上げを停止
   const stopSpeaking = () => {
     Speech.stop();
     setIsPlaying(false);
@@ -97,7 +94,10 @@ const SummaryModal = ({ isVisible, onClose, chartData, mvp, categoryChartData, e
             <ActivityIndicator size="large" color="#FF8DA1" />
           ) : (
             <>
-              <Text style={styles.summaryText}>{summary}</Text>
+              {/* ここを修正しました */}
+              <ScrollView style={styles.summaryScrollView}>
+                <Text style={styles.summaryText}>{summary}</Text>
+              </ScrollView>
               <Pressable style={styles.playPauseButton} onPress={handlePlayPause}>
                 <Ionicons name={isPlaying ? 'pause' : 'play'} size={40} color="#fff" />
               </Pressable>
@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: '100%',
+    maxHeight: '80%', // 追加: モーダルの最大高さを設定
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -142,11 +143,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  // 追加: ScrollViewのスタイル
+  summaryScrollView: {
+    width: '100%',
+    marginBottom: 20,
+  },
   summaryText: {
     fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
-    marginBottom: 20, // ボタンのための余白を追加
   },
   playPauseButton: {
     backgroundColor: '#FF8DA1',
