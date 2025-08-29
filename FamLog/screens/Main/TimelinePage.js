@@ -10,7 +10,7 @@ import { useFetchPosts } from '../../hooks/useFetchPosts';
 import { usePraise } from '../../hooks/usePraise';
 import { useComment } from '../../hooks/useComment';
 import { useFocusEffect } from '@react-navigation/native';
-import Timeline from '../../components/organisms/Timeline';
+import TimeLine from '../../components/organisms/TimeLine';
 import { useAuth } from '../../hooks/useAuth';
 
 const TimelinePage = () => {
@@ -108,7 +108,7 @@ const TimelinePage = () => {
 
   return (
     <LinearGradient colors={["#FFE6F0", "#E6F0FF"]} style={{ flex: 1 }}>
-        <Timeline
+        <TimeLine
           posts={timelinePosts}
           session={session}
           commentText={commentText}

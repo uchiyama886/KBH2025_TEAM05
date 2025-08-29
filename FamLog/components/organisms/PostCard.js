@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import InteractionSection from '../molecules/InteractionSection';
+import EmojiList from '../atoms/EmojiList';
 
 const PostCard = ({
   post,
@@ -31,6 +32,11 @@ const PostCard = ({
       </View>
       <Text style={styles.message}>{post.content}</Text>
 
+      {/* 2. post.emojisがある場合にEmojiListコンポーネントをレンダリングする */}
+      {post.emojis && post.emojis.length > 0 && (
+        <EmojiList emojis={post.emojis} />
+      )}
+      
       {/* インタラクションセクション */}
       <InteractionSection
         postId={post.id}
