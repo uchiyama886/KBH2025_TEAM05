@@ -11,7 +11,7 @@ const PostButton = ({ onPress, loading }) => {
       {loading ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <Text style={styles.postButtonText}>コミットを投稿</Text>
+        <Text style={styles.postButtonText}>頑張りをとうこう</Text>
       )}
     </TouchableOpacity>
   );

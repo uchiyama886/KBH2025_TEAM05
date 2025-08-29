@@ -49,7 +49,7 @@ const Postlist = ({
           selectedEmojis={selectedEmojis} 
           onSelectEmoji={setSelectedEmojis} 
         />
-        <CommitMessageDisplay commitMessage={commitMessage} />
+        {/* <CommitMessageDisplay commitMessage={commitMessage} /> */}
         <PostButton onPress={handlePost} loading={loading} />
       </ScrollView>
     </SafeAreaView>

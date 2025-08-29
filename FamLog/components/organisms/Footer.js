@@ -21,7 +21,7 @@ const Footer = ({ state, navigation }) => {
 
       <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Post')}>
         <Ionicons name="add-circle-outline" size={24} color={getIconColor(1)} />
-        <Text style={[styles.tabText, { color: getTextColor(1) }]}>投稿</Text>
+        <Text style={[styles.tabText, { color: getTextColor(1) }]}>とうこう</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('Dashboard')}>

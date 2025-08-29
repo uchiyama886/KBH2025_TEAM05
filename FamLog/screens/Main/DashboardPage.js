@@ -173,7 +173,7 @@ const DashboardPage = () => {
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.contentContainer}>
-            <Text style={styles.sectionTitle}>今週の貢献度</Text>
+            <Text style={styles.sectionTitle}>今週のがんばり</Text>
             <View style={styles.chartContainer}>
               <BarChart
                 data={chartData}
@@ -197,7 +197,7 @@ const DashboardPage = () => {
               />
             </View>
 
-            <Text style={styles.sectionTitle}>カテゴリー別投稿数</Text>
+            <Text style={styles.sectionTitle}>使われたカテゴリー</Text>
             <View style={styles.chartContainer}>
               <BarChart
                 data={categoryChartData}
@@ -221,7 +221,7 @@ const DashboardPage = () => {
               />
             </View>
 
-            <Text style={styles.sectionTitle}>絵文字の使用頻度</Text>
+            <Text style={styles.sectionTitle}>使われた絵文字</Text>
             <View style={styles.chartContainer}>
               <PieChart
                 data={emojiChartData}
