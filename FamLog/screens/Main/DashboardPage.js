@@ -6,21 +6,19 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Dimensions,
-  ScrollView // ScrollViewをインポート
+  ScrollView,
+  Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { BarChart, PieChart } from "react-native-chart-kit";
 
 import { useFetchPosts } from "../../hooks/useFetchPosts";
+import SummaryModal from '../../components/organisms/SummaryModal';
 
 const screenWidth = Dimensions.get("window").width;
 
-/**
- * 投稿データから貢献度グラフ用のデータを生成
- * @param {Array} posts - 取得した投稿データ
- * @returns {{labels: Array, datasets: Array}}
- */
+// ... (getChartData, calculateMVP, getCategoryChartData, getEmojiChartData の関数は省略) ...
 const getChartData = (posts) => {
   const contributionMap = {};
   const today = new Date();
@@ -55,11 +53,6 @@ const getChartData = (posts) => {
   };
 };
 
-/**
- * 貢献度が最も高いユーザーを計算（今週のMVP）
- * @param {Array} posts - 取得した投稿データ
- * @returns {{name: string, commits: number}|null} MVPのユーザー情報、またはnull
- */
 const calculateMVP = (posts) => {
   const commitCounts = {};
   posts.forEach((post) => {
@@ -87,11 +80,6 @@ const calculateMVP = (posts) => {
   return mvp;
 };
 
-/**
- * 投稿データからカテゴリー別投稿数グラフ用のデータを生成
- * @param {Array} posts - 取得した投稿データ
- * @returns {{labels: Array, datasets: Array}}
- */
 const getCategoryChartData = (posts) => {
   const categoryMap = {};
   posts.forEach((post) => {
@@ -117,11 +105,6 @@ const getCategoryChartData = (posts) => {
   };
 };
 
-/**
- * 投稿データから絵文字の使用頻度グラフ用のデータを生成
- * @param {Array} posts - 取得した投稿データ
- * @returns {{labels: Array, datasets: Array}}
- */
 const getEmojiChartData = (posts) => {
   const emojiMap = {};
   posts.forEach((post) => {
@@ -152,11 +135,21 @@ const getEmojiChartData = (posts) => {
 };
 
 const DashboardPage = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  
   const { posts, loading, error } = useFetchPosts();
   const chartData = getChartData(posts);
   const mvp = calculateMVP(posts);
   const categoryChartData = getCategoryChartData(posts);
   const emojiChartData = getEmojiChartData(posts);
+
+  const handleOpenModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+  };
 
   if (loading) {
     return (
@@ -258,6 +251,19 @@ const DashboardPage = () => {
             </View>
           </View>
         </ScrollView>
+        <Pressable style={styles.playButton} onPress={handleOpenModal}>
+          <Ionicons name="play-circle" size={60} color="#FF8DA1" />
+        </Pressable>
+        
+        {/* SummaryModalにデータを渡す */}
+        <SummaryModal 
+          isVisible={isModalVisible} 
+          onClose={handleCloseModal}
+          chartData={chartData}
+          mvp={mvp}
+          categoryChartData={categoryChartData}
+          emojiChartData={emojiChartData}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -268,7 +274,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
-    flex: 1, // ScrollViewが画面全体を占めるように設定
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -283,7 +289,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingBottom: 80, // スクロール時にコンテンツが隠れないように下部に余白を追加
+    paddingBottom: 80,
   },
   sectionTitle: {
     fontSize: 20,
@@ -329,6 +335,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     color: "#888",
+  },
+  playButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#fff",
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
 
