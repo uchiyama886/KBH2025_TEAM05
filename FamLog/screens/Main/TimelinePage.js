@@ -3,22 +3,21 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFetchPosts } from '../../hooks/useFetchPosts';
 import { usePraise } from '../../hooks/usePraise';
 import { useComment } from '../../hooks/useComment';
-import { useAuthContext } from '../../hooks/useAuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import Timeline from '../../components/organisms/Timeline';
+import { useAuth } from '../../hooks/useAuth';
 
 const TimelinePage = () => {
   const { posts: initialPosts, loading, error, fetchPosts } = useFetchPosts();
   const { addPraise } = usePraise();
   const { addComment } = useComment();
-  const { session } = useAuthContext();
+  const { session } = useAuth(); // useAuthフックを使ってsessionを取得する
   const [timelinePosts, setTimelinePosts] = useState([]);
   const [commentText, setCommentText] = useState({});
 
